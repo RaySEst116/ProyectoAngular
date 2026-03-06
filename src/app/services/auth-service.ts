@@ -1,0 +1,70 @@
+import { computed, Injectable, signal } from '@angular/core';
+
+export interface SessionUser {
+  id: number,
+  name: string,
+  email: string
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+export class AuthService {
+  mockUser: any[] = [
+    {id: 1, name: "José Ramos", email: "correo@gmail.com", password: "123456"},
+    {id: 2, name: "Alfonso", email: "correo@hotmail.com", password: "asdfgh"},
+  ]
+
+  private readonly storageHey = 'session_user'
+
+  private readonly _currentUser = signal<SessionUser | null>(this.readFromStorage())
+
+  readonly currentUser = computed(() => this._currentUser())
+  readonly isAuthenticated = computed(() => this._currentUser() !== null)
+
+  Login(email: string, password: string){
+    const exist = this.mockUser.find(user => user.email.toLowerCase() === email.toLowerCase().trim() && user.password.toLowerCase() === password.toLowerCase().trim())
+
+    if(!exist) return false
+
+    const sessionUser: SessionUser = {
+      id: exist.id,
+      name: exist.name,
+      email: exist.email
+    }
+
+    localStorage.setItem(this.storageHey, JSON.stringify(sessionUser))
+
+    this._currentUser.set(sessionUser)
+
+    return true
+  }
+
+  readFromStorage(){
+    const user = localStorage.getItem(this.storageHey)
+    if(!user) return null
+    try {
+      return JSON.parse(user) as SessionUser
+    } catch (error) {
+      return null
+    }
+  }
+
+  logout(): void {
+    this._currentUser.set(null)
+    localStorage.removeItem(this.storageHey)
+  }
+
+  getInitials(): string {
+    const user = this.currentUser();
+    if (!user || !user.name) return '';
+
+    const parts = user.name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return '';
+
+    const first = parts[0].charAt(0).toUpperCase();
+    const second = parts.length > 1 ? parts[parts.length - 1].charAt(0).toUpperCase() : '';
+
+    return first + second;
+  }
+}

@@ -1,0 +1,10 @@
+<main>
+  <section>
+    <h2>Home protegido</h2>
+    <p>Bienvemido, {{ auth.currentUser()?.name }}</p>
+    <p>email: {{ auth.currentUser()?.email }}</p>
+
+    <button (click)="logout()">Cerrar sesion</button>
+  </section>
+</main>
+

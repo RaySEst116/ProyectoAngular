@@ -1,0 +1,14 @@
+<mat-nav-list>
+  @for (fragment of fragments; track fragment.link) {
+    <a
+      mat-list-item
+      (click)="$event.preventDefault(); activeLink = fragment.link"
+      [activated]="activeLink === fragment.link"
+      routerLink="/{{ fragment.link }}"
+    >
+      <mat-icon aria-hidden="false" aria-label="Example home icon" fontIcon="{{fragment.icon}}"></mat-icon>
+
+      {{ fragment.link | titlecase }}</a
+    >
+  }
+</mat-nav-list>
