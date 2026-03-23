@@ -63,6 +63,22 @@ const register = async({name, email, password}) => {
     }
 }
 
+const getUserById = async(id) => {
+    const user = await prisma.users.findUnique({
+        where : { id: Number(id) },
+        select : {
+            id : true,
+            name : true,
+            email : true
+        }
+    })
+
+    if(!user) {
+        throw new Error("Usuario no encontrado")
+    }
+    return user;
+}
+
 const getUsers = async() => {
     return await prisma.users.findMany({
         select : {
@@ -73,8 +89,60 @@ const getUsers = async() => {
     })
 }
 
+const updateUser = async (id, { name, email, password }) => {
+    const user = await prisma.users.findUnique({
+        where: { id: Number(id) }
+    })
+
+    if (!user) {
+        throw new Error("Usuario no encontrado")
+    }
+
+    const data = {}
+
+    if (name) data.name = name
+    if (email) data.email = email
+    if (password) data.password = await bcrypt.hash(password, 10)
+
+    const updatedUser = await prisma.users.update({
+        where: { id: Number(id) },
+        data,
+        select: {
+            id: true,
+            name: true,
+            email: true
+        }
+    })
+
+    return {
+        message: "Usuario actualizado correctamente",
+        user: updatedUser
+    }
+}
+
+const deleteUser = async (id) => {
+    const user = await prisma.users.findUnique({
+        where: { id: Number(id) }
+    })
+
+    if (!user) {
+        throw new Error("Usuario no encontrado")
+    }
+
+    await prisma.users.delete({
+        where: { id: Number(id) }
+    })
+
+    return {
+        message: "Usuario eliminado correctamente"
+    }
+}
+
 module.exports = {
     login,
     register,
-    getUsers
+    getUsers,
+    getUserById,
+    updateUser,
+    deleteUser
 }
