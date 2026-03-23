@@ -24,13 +24,23 @@ const login = async({ email, password }) => {
 
         process.env.JWT_SECRET,
         { 
-            expires: '1h' 
+            expiresIn: '1h' 
         }
     );
 
     return {
         message : 'Login correcto',
         token
+    }
+}
+
+const register = async({name, email, password}) => {
+    const existeUsuario = await prisma.users.findUnique({
+        where : {email}
+    })
+
+    if(existeUsuario) {
+        throw new Error("El correo ya está registrado")
     }
 }
 
