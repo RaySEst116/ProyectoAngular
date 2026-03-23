@@ -42,8 +42,39 @@ const register = async({name, email, password}) => {
     if(existeUsuario) {
         throw new Error("El correo ya está registrado")
     }
+
+    const hashPassword = await bcryot.hash(password, 10)
+
+    const user = await prisma.users.create({
+        data : {
+            name,
+            email,
+            password : hashPassword
+        }
+    })
+
+    return {
+        message : "Usuario registrado correctamente",
+        user : {
+            id : user.id,
+            name : user.name,
+            email : user.email
+        }
+    }
+}
+
+const getUsers = async() => {
+    return await prisma.users.findMany({
+        select : {
+            id : true,
+            name : true,
+            email : true
+        }
+    })
 }
 
 module.exports = {
-    login
+    login,
+    register,
+    getUsers
 }

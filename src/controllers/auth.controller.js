@@ -11,4 +11,29 @@ const login = async(req, res) => {
     }
 }
 
-module.exports = login
+const register = async(req, res) => {
+    try {
+
+    } catch(error) {
+        res.status(400).json({
+            message: error.message
+        })
+    }
+}
+
+const getUsers = async(req, res) => {
+    try {
+        const users = await authService.getUsers()
+        res.json(users)
+    } catch(error) {
+        res.status(500).json({
+            message: error.message
+        })
+    }
+}
+
+module.exports = {
+    login,
+    register,
+    getUsers
+}
