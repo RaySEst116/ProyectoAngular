@@ -1,4 +1,7 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { map, Observable, tap } from 'rxjs';
+import { enviroment } from '../../enviroment/enviroment';
 
 export interface SessionUser {
   id: number,
@@ -6,65 +9,80 @@ export interface SessionUser {
   email: string
 }
 
+interface LoginResponse {
+  token: string
+  message: string
+  user: SessionUser
+}
+
 @Injectable({
   providedIn: 'root',
 })
-export class AuthService {
-  mockUser: any[] = [
-    {id: 1, name: "José Ramos", email: "correo@gmail.com", password: "123456"},
-    {id: 2, name: "Alfonso", email: "correo@hotmail.com", password: "asdfgh"},
-  ]
 
-  private readonly storageHey = 'session_user'
+export class AuthService {
+  private http = inject(HttpClient)
+
+  private readonly storageKey = 'session_user'
+  private readonly storageKeyToken = 'session_toekn'
+  private readonly loginUrl = `${enviroment.apiUrl}/auth/login`
+  private readonly registerUrl = `${enviroment.apiUrl}/auth/register`
+  private readonly userUrl = `${enviroment.apiUrl}/auth/users`
 
   private readonly _currentUser = signal<SessionUser | null>(this.readFromStorage())
 
   readonly currentUser = computed(() => this._currentUser())
   readonly isAuthenticated = computed(() => this._currentUser() !== null)
 
-  Login(email: string, password: string){
-    const exist = this.mockUser.find(user => user.email.toLowerCase() === email.toLowerCase().trim() && user.password.toLowerCase() === password.toLowerCase().trim())
+  login(email: string, password: string): Observable<SessionUser> {
+    return this.http.post<LoginResponse>(this.loginUrl, { email, password }).pipe (
+      tap((response: LoginResponse) => {
+        localStorage.setItem(this.storageKey, JSON.stringify(response.user))
+        localStorage.setItem(this.storageKeyToken, response.token)
+        this._currentUser.set(response.user)
+        console.log(response.user)
+      }),
+      map((response: LoginResponse) => response.user)
+    )
+  }
 
-    if(!exist) return false
+  register(user: Partial<SessionUser> & { password?: string }): Observable<SessionUser> {
+    return this.http.post<LoginResponse>(this.registerUrl, user).pipe (
+      tap((response: LoginResponse) => {
+        if (response.token && response.user) {
+          localStorage.setItem(this.storageKey, JSON.stringify(response.user))
+          localStorage.setItem(this.storageKeyToken, response.token)
+          this._currentUser.set(response.user)
+        }
+      }),
+      map((response: LoginResponse) => response.user)
+    )
+  }
 
-    const sessionUser: SessionUser = {
-      id: exist.id,
-      name: exist.name,
-      email: exist.email
-    }
+  getUsers(): Observable<SessionUser[]> {
+    return this.http.get<SessionUser[]>(this.userUrl)
+  }
 
-    localStorage.setItem(this.storageHey, JSON.stringify(sessionUser))
+  updateUser(id: number, user: Partial<SessionUser> & { password?: string }): Observable<SessionUser> {
+    return this.http.put<SessionUser>(`${this.userUrl}/${id}`, user)
+  }
 
-    this._currentUser.set(sessionUser)
-
-    return true
+  deleteUser(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.userUrl}/${id}`)
   }
 
   readFromStorage(){
-    const user = localStorage.getItem(this.storageHey)
+    const user = localStorage.getItem(this.storageKey)
     if(!user) return null
     try {
       return JSON.parse(user) as SessionUser
     } catch (error) {
+      localStorage.removeItem(this.storageKey)
       return null
     }
   }
 
   logout(): void {
     this._currentUser.set(null)
-    localStorage.removeItem(this.storageHey)
-  }
-
-  getInitials(): string {
-    const user = this.currentUser();
-    if (!user || !user.name) return '';
-
-    const parts = user.name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return '';
-
-    const first = parts[0].charAt(0).toUpperCase();
-    const second = parts.length > 1 ? parts[parts.length - 1].charAt(0).toUpperCase() : '';
-
-    return first + second;
+    localStorage.removeItem(this.storageKey)
   }
 }
