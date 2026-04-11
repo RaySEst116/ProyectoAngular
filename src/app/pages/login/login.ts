@@ -2,11 +2,13 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth-service';
 import { Router } from '@angular/router';
+import { NgClass } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/httm';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, NgClass],
   templateUrl: './login.html',
   styleUrls: ['./login.scss'],
 })
@@ -22,21 +24,27 @@ export class Login {
     password: ['', [Validators.required, Validators.minLength(8)]]
   })
 
+  isPasswordVisible = false
+  loginFailed = false
+
+  togglePasswordVisibility() {
+    this.isPasswordVisible = !this.isPasswordVisible
+  }
+
   onSubmit(){
-    // if(this.form.invalid){
-    //   this.form.markAllAsDirty()
-    //   return
-    // }
-
-    console.log(this.form.value)
-
-    const { email, password } = this.form.getRawValue()
-    const valid = this.auth.Login(email!, password!)
-
-    if(valid){
-      this.router.navigateByUrl('/home')
-      return;
+    if(this.form.invalid){
+      this.form.markAllAsDirty()
+      return
     }
 
+    console.log(this.form.value)
+    const { email, password } = this.form.getRawValue()
+    this.auth.login(email!, password!).subscribe({
+      next: () => this.router.navigateByUrl('/home'),
+      error: (error: HttpErrorResponse) => {
+        console.log(error)
+        console.log(error.status)
+      }
+    })
   }
 }
