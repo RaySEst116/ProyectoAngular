@@ -1,20 +1,18 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Sidebarmenu } from '../../shared/sidebarmenu/sidebarmenu';
-import { AuthService } from '../../services/auth-service';
+import {MatIconModule} from '@angular/material/icon';
+import {MatListModule} from '@angular/material/list';
+import { SidebarMenu } from "../../shared/sidebar-menu/sidebar-menu";
+import { Header } from "../../shared/header/header";
+
 
 @Component({
   selector: 'app-layout',
-  imports: [
-    RouterOutlet,
-    Sidebarmenu
-  ],
+  imports: [RouterOutlet, MatListModule, MatIconModule, SidebarMenu, Header],
   templateUrl: './layout.html',
   styleUrl: './layout.scss',
 })
 
 export class Layout {
 
-  authService = inject(AuthService)
-  initials = this.authService.getInitials();
 }

@@ -19,6 +19,17 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/alumnos/alumnos').then((m) => m.Alumnos)
       },
       {
+        path: 'maestros',
+        canActivate: [authGuard],
+        loadComponent: () => import('./pages/maestros/maestros').then(m => m.Maestros)
+
+    },
+    {
+        path: 'usuarios',
+        canActivate: [authGuard],
+        loadComponent: () => import('./pages/usuarios/usuarios').then(m => m.Usuarios)
+    },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'home'

@@ -1,16 +1,20 @@
-import { TitleCasePipe } from '@angular/common';
 import { Component } from '@angular/core';
+import { RouterLink, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-sidebarmenu',
-  imports: [RouterLink, MatListModule, MatIconModule, TitleCasePipe],
-  templateUrl: './sidebarmenu.html',
-  styleUrl: './sidebarmenu.scss',
+  selector: 'app-sidebar-menu',
+  imports: [RouterLink, MatListModule, MatIconModule, RouterModule],
+  templateUrl: './sidebar-menu.html',
+  styleUrl: './sidebar-menu.scss',
 })
-export class Sidebarmenu {
-  fragments = [{ link: 'home', icon: 'home' }, { link: 'alumnos', icon: 'account_circle' }, { link: 'maestros', icon: 'co_present' }, { link: 'calificaciones', icon: 'assignment' }]
+export class SidebarMenu {
+  fragments = [
+    { name: 'Home', link: '/home' },
+    { name: 'Alumnos', link: '/alumnos' },
+    { name: 'Maestros', link: '/profesores' },
+    { name: 'Calificaciones', link: '/calificaciones' },
+  ];
   activeLink: string | null = null;
 }
