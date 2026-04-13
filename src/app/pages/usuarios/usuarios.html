@@ -15,8 +15,14 @@
                 @if (form.get('name')?.errors?.['minlength'] && form.get('name')?.dirty) {
                     <span class="validation-error">Debe tener mínimo 3 caracteres</span>
                 }
+                @if (form.get('name')?.errors?.['nameTaken'] && form.get('name')?.dirty) {
+                    <span class="validation-error">Este nombre de usuario ya está en uso</span>
+                }
+                @if (form.get('name')?.status === 'PENDING' && form.get('name')?.dirty) {
+                    <span class="validation-pending">Verificando disponibilidad...</span>
+                }
             </div>
-        
+
             <div class="form-field">
                 <mat-form-field appearance="outline" style="width: 100%">
                     <mat-label>Correo electrónico</mat-label>
@@ -29,7 +35,7 @@
                     <span class="validation-error">Debe tener la estructura de un correo válido</span>
                 }
             </div>
-        
+
             <div class="form-field-password">
                 <mat-form-field appearance="outline" style="width: 100%">
                     <mat-label>Contraseña</mat-label>
@@ -47,7 +53,7 @@
                     <span class="validation-error">Debe tener máximo 20 caracteres</span>
                 }
             </div>
-        
+
             @if (errorMessage()) {
             <div class="form-messages">
                 <p class="error-message">{{ errorMessage() }}</p>
@@ -62,7 +68,7 @@
 
         <div class="action-buttons">
             <button mat-flat-button class="rounded-btn guardar-btn" (click)="onSubmit()"
-                [disabled]="form.invalid || loading()">
+                [disabled]="form.invalid || form.pending || loading()">
                 @if (loading()) {
                 Guardando...
                 } @else if (editingUserId()) {

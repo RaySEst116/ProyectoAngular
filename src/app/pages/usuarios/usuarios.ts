@@ -2,26 +2,28 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, AsyncValidatorFn, FormBuilder, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { AutService } from '../../services/aut-service';
+import { UsuariosService } from '../../services/usuarios-service';
+import { debounceTime, first, map, Observable, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-usuarios',
   imports: [
-    MatListModule, 
-    MatIconModule, 
-    RouterModule, 
-    FormsModule, 
-    ReactiveFormsModule, 
-    MatFormFieldModule, 
-    MatInputModule, 
-    MatButtonModule, 
-    MatProgressSpinnerModule, 
+    MatListModule,
+    MatIconModule,
+    RouterModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
     MatTableModule],
   templateUrl: './usuarios.html',
   styleUrl: './usuarios.scss',
@@ -38,12 +40,30 @@ export class Usuarios implements OnInit {
 
   private fb = inject(FormBuilder);
   private autService = inject(AutService);
+  private usuariosService = inject(UsuariosService);
 
   form = this.fb.group({
-    name:     ['', [Validators.required, Validators.minLength(3)]],
+    name:     ['',
+      [Validators.required, Validators.minLength(3)],
+      [this.nameExistsValidator()]
+    ],
     email:    ['', [Validators.required, Validators.email]],
     password: ['', [Validators.minLength(8), Validators.maxLength(20)]],
   });
+
+  nameExistsValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      return control.valueChanges.pipe(
+        debounceTime(500),
+        switchMap(value =>
+          this.usuariosService.checkNameExists(value).pipe(
+            map(exists => exists ? { nameTaken: true } : null)
+          )
+        ),
+        first()
+      );
+    };
+  }
 
   ngOnInit() {
     this.loadUsers();
@@ -53,8 +73,6 @@ export class Usuarios implements OnInit {
     this.autService.getUsers().subscribe({
       next: (data: any) => {
         console.log('API Response (users):', data);
-        // Sometimes APIs return the array inside a property like `data` or `users`
-        // e.g., if (data.data) this.users.set(data.data);
         this.users.set(data);
       },
       error: (err) => console.error('Error loading users:', err)
@@ -95,9 +113,9 @@ export class Usuarios implements OnInit {
     } else {
       // CREATE USER
       if (!password || password.length < 6) {
-          this.errorMessage.set('La contraseña es obligatoria y debe tener al menos 6 caracteres.');
-          this.loading.set(false);
-          return;
+        this.errorMessage.set('La contraseña es obligatoria y debe tener al menos 6 caracteres.');
+        this.loading.set(false);
+        return;
       }
       this.autService.register({ name: name!, email: email!, password: password! }).subscribe({
         next: () => {
