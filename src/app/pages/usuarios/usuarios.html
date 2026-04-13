@@ -4,26 +4,50 @@
         <p class="subtitle">Administra los usuarios registrados en el sistema</p>
 
         <form class="form-grid" [formGroup]="form">
-            <mat-form-field appearance="outline" class="form-field">
-                <mat-label>Nombre</mat-label>
-                <input matInput formControlName="name">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="form-field">
-                <mat-label>Correo electronico</mat-label>
-                <input matInput formControlName="email">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="form-field-password">
-                <mat-label>Contraseña</mat-label>
-                <input matInput [type]="hide() ? 'password' : 'text'" formControlName="password" />
-                <button matIconButton matSuffix (click)="clickEvent($event)" [attr.aria-label]="'Hide password'"
-                    type="button" [attr.aria-pressed]="hide()">
-                    <mat-icon>{{hide() ? 'visibility_off' : 'visibility'}}</mat-icon>
-                </button>
-                <mat-hint>Obligatoria para crear.</mat-hint>
-            </mat-form-field>
-
+            <div class="form-field">
+                <mat-form-field appearance="outline" style="width: 100%">
+                    <mat-label>Nombre</mat-label>
+                    <input matInput formControlName="name">
+                </mat-form-field>
+                @if (form.get('name')?.errors?.['required'] && form.get('name')?.dirty) {
+                    <span class="validation-error">El nombre no puede quedar vacío</span>
+                }
+                @if (form.get('name')?.errors?.['minlength'] && form.get('name')?.dirty) {
+                    <span class="validation-error">Debe tener mínimo 3 caracteres</span>
+                }
+            </div>
+        
+            <div class="form-field">
+                <mat-form-field appearance="outline" style="width: 100%">
+                    <mat-label>Correo electrónico</mat-label>
+                    <input matInput formControlName="email">
+                </mat-form-field>
+                @if (form.get('email')?.errors?.['required'] && form.get('email')?.dirty) {
+                    <span class="validation-error">El correo no puede quedar vacío</span>
+                }
+                @if (form.get('email')?.errors?.['email'] && form.get('email')?.dirty) {
+                    <span class="validation-error">Debe tener la estructura de un correo válido</span>
+                }
+            </div>
+        
+            <div class="form-field-password">
+                <mat-form-field appearance="outline" style="width: 100%">
+                    <mat-label>Contraseña</mat-label>
+                    <input matInput [type]="hide() ? 'password' : 'text'" formControlName="password">
+                    <button matIconButton matSuffix (click)="clickEvent($event)" [attr.aria-label]="'Hide password'"
+                        type="button" [attr.aria-pressed]="hide()">
+                        <mat-icon>{{ hide() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    </button>
+                    <mat-hint>Obligatoria para crear.</mat-hint>
+                </mat-form-field>
+                @if (form.get('password')?.errors?.['minlength'] && form.get('password')?.dirty) {
+                    <span class="validation-error">Debe tener mínimo 8 caracteres</span>
+                }
+                @if (form.get('password')?.errors?.['maxlength'] && form.get('password')?.dirty) {
+                    <span class="validation-error">Debe tener máximo 20 caracteres</span>
+                }
+            </div>
+        
             @if (errorMessage()) {
             <div class="form-messages">
                 <p class="error-message">{{ errorMessage() }}</p>

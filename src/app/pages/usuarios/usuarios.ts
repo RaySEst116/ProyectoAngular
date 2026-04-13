@@ -40,10 +40,10 @@ export class Usuarios implements OnInit {
   private autService = inject(AutService);
 
   form = this.fb.group({
-    name: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-    password: [''], // Password unrequired for editing
-  })
+    name:     ['', [Validators.required, Validators.minLength(3)]],
+    email:    ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.minLength(8), Validators.maxLength(20)]],
+  });
 
   ngOnInit() {
     this.loadUsers();

@@ -32,12 +32,12 @@ export class Alumnos implements OnInit {
   private dialog = inject(MatDialog);
 
   form = this.fb.group({
-    nombre: ['', Validators.required],
-    apellido: ['', Validators.required],
-    matricula: ['', Validators.required],
-    carrera: ['', Validators.required],
-    cuatrimestre: [1, [Validators.required, Validators.min(1)]],
-    correo: ['', [Validators.required, Validators.email]],
+    nombre:       ['', [Validators.required, Validators.minLength(3)]],
+    apellido:     ['', [Validators.required, Validators.minLength(3)]],
+    matricula:    ['', [Validators.required, Validators.minLength(5)]],
+    carrera:      ['', Validators.required],
+    cuatrimestre: [1,  [Validators.required, Validators.min(1), Validators.max(12)]],
+    correo:       ['', [Validators.required, Validators.email]],
   });
 
   ngOnInit() {

@@ -29,12 +29,12 @@ export class Maestros implements OnInit {
   private maestrosService = inject(MaestrosService);
 
   form = this.fb.group({
-    nombre: ['', Validators.required],
-    apellido: ['', Validators.required],
-    numeroEmpleado: ['', Validators.required],
-    departamento: ['', Validators.required],
-    especialidad: ['', Validators.required],
-    correo: ['', [Validators.required, Validators.email]],
+    nombre:         ['', [Validators.required, Validators.minLength(3)]],
+    apellido:       ['', [Validators.required, Validators.minLength(3)]],
+    numeroEmpleado: ['', [Validators.required, Validators.minLength(5)]],
+    departamento:   ['', Validators.required],
+    especialidad:   ['', Validators.required],
+    correo:         ['', [Validators.required, Validators.email]],
   });
 
   ngOnInit() {
